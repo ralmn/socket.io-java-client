@@ -13,8 +13,6 @@ import java.net.URL;
 import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-
 import org.json.JSONObject;
 
 /**
@@ -35,6 +33,8 @@ public class SocketIO {
 	private Properties headers = new Properties();
 
 	private URL url;
+
+	private String queryString;
 
 	/**
 	 * Instantiates a new socket.io connection. The object connects after
@@ -57,6 +57,17 @@ public class SocketIO {
 	public SocketIO(final String url) throws MalformedURLException {
 		if (url == null)
 			throw new RuntimeException("url may not be null.");
+		setAndConnect(new URL(url), null);
+	}
+
+	public SocketIO(final String url, String queryString)
+			throws MalformedURLException {
+		if (url == null)
+			throw new RuntimeException("url may not be null.");
+
+		if (queryString != null)
+			this.queryString = queryString;
+
 		setAndConnect(new URL(url), null);
 	}
 
@@ -123,7 +134,7 @@ public class SocketIO {
 	public SocketIO(final URL url) {
 		setAndConnect(url, null);
 	}
-	
+
 	/**
 	 * Set the socket factory used for SSL connections.
 	 * @param socketFactory
@@ -131,7 +142,7 @@ public class SocketIO {
 	public static void setDefaultSSLSocketFactory(SSLContext sslContext) {
 		IOConnection.setSslContext(sslContext);
 	}
-	
+
 	/**
 	 * connects to supplied host using callback. Do only use this method if you
 	 * instantiate {@link SocketIO} using {@link #SocketIO()}.
@@ -231,7 +242,7 @@ public class SocketIO {
 	 * @param event
 	 *            the event name
 	 * @param args
-	 *            arguments. can be any argument {@link org.json.JSONArray#put(Object)} can take. 
+	 *            arguments. can be any argument {@link org.json.JSONArray#put(Object)} can take.
 	 */
 	public void emit(final String event, final Object... args) {
 		this.connection.emit(this, event, null, args);
@@ -247,7 +258,7 @@ public class SocketIO {
 	 * @param ack
 	 *            an acknowledge implementation
 	 * @param args
-	 *            arguments. can be any argument {@link org.json.JSONArray#put(Object)} can take. 
+	 *            arguments. can be any argument {@link org.json.JSONArray#put(Object)} can take.
 	 */
 	public void emit(final String event, IOAcknowledge ack,
 			final Object... args) {
@@ -342,7 +353,7 @@ public class SocketIO {
 	public boolean isConnected() {
 		return this.connection != null && this.connection.isConnected();
 	}
-	
+
 	/**
 	 * Returns the name of the used transport
 	 * 
@@ -363,6 +374,14 @@ public class SocketIO {
 	 */
 	public Properties getHeaders() {
 		return headers;
+	}
+
+	public String getQueryString() {
+		return queryString;
+	}
+
+	public void setQueryString(String queryString) {
+		this.queryString = queryString;
 	}
 
 	/**

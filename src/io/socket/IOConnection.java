@@ -27,8 +27,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,6 +99,8 @@ class IOConnection implements IOCallback {
 
 	/** Custom Request headers used while handshaking */
 	private Properties headers;
+
+	private String queryString;
 
 	/**
 	 * The first socket to be connected. the socket.io server does not send a
@@ -295,11 +295,17 @@ class IOConnection implements IOCallback {
 		URLConnection connection;
 		try {
 			setState(STATE_HANDSHAKE);
-			url = new URL(IOConnection.this.url.toString() + SOCKET_IO_1);
+
+			String connectionUrl = IOConnection.this.url.toString() + SOCKET_IO_1;
+			if ( this.queryString != null ) {
+				connectionUrl += "?" + this.queryString;
+			}
+
+			url = new URL(connectionUrl);
 			connection = url.openConnection();
 			if (connection instanceof HttpsURLConnection) {
 				((HttpsURLConnection) connection)
-						.setSSLSocketFactory(sslContext.getSocketFactory());
+				.setSSLSocketFactory(sslContext.getSocketFactory());
 			}
 			connection.setConnectTimeout(connectTimeout);
 			connection.setReadTimeout(connectTimeout);
@@ -407,6 +413,7 @@ class IOConnection implements IOCallback {
 		try {
 			this.url = new URL(url);
 			this.urlStr = url;
+			this.queryString = socket.getQueryString();
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
@@ -529,7 +536,7 @@ class IOConnection implements IOCallback {
 			try {
 				// DEBUG
 				String[] texts = outputBuffer.toArray(new String[outputBuffer
-						.size()]);
+				                                                 .size()]);
 				logger.info("Bulk start:");
 				for (String text : texts) {
 					logger.info("> " + text);
@@ -589,7 +596,7 @@ class IOConnection implements IOCallback {
 				.listIterator(1);
 		while (fragments.hasNext()) {
 			int length = Integer.parseInt(fragments.next());
-			String string = (String) fragments.next();
+			String string = fragments.next();
 			// Potential BUG: it is not defined if length is in bytes or
 			// characters. Assuming characters.
 
