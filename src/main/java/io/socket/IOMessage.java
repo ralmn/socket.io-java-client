@@ -13,7 +13,6 @@ package io.socket;
  * The Class IOMessage.
  */
 class IOMessage {
-
 	/** Message type disconnect */
 	public static final int TYPE_DISCONNECT = 0;
 
