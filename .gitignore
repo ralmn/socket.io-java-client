@@ -1,2 +1,8 @@
 bin/
 jar/
+idea/
+altassian-ide-plugin.xml
+*.iml
+.project
+.classpath
+
